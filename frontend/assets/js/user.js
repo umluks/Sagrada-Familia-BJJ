@@ -1,69 +1,59 @@
+// Aguarda o carregamento completo do DOM
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("cadastro-form");
 
   if (form) {
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const nome = document.getElementById("nome").value;
-      const dt_nascimento = document.getElementById("dt_nascimento").value;
-      const contato = document.getElementById("contato").value;
-      const email = document.getElementById("email").value;
-      const endereco = document.getElementById("endereco").value;
-      const cidade = document.getElementById("cidade").value;
-      const faixa = document.getElementById("faixa").value;
-      const grau = document.getElementById("grau").value;
-      const ultgraduacao = document.getElementById("ultgraduacao").value;
-      const nomeemergencia = document.getElementById("nomeemergencia").value;
-      const contatoemergencia =
-        document.getElementById("contatoemergencia").value;
-
-      console.log("Dados do formulário:", {
-        nome,
-        dt_nascimento,
-        contato,
-        email,
-        endereco,
-        cidade,
-        faixa,
-        grau,
-        ultgraduacao,
-        nomeemergencia,
-        contatoemergencia,
-      });
-
-      try {
-        const response = await fetch("http://localhost:3000/alunos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nome,
-            dt_nascimento,
-            contato,
-            email,
-            endereco,
-            cidade,
-            faixa,
-            grau,
-            ultgraduacao,
-            nomeemergencia,
-            contatoemergencia,
-          }),
-        });
-
-        if (!response.ok) throw new Error("Erro ao cadastrar usuário");
-
-        alert("Usuário cadastrado com sucesso!");
-        form.reset();
-        carregaralunos();
-      } catch (error) {
-        alert(error.message);
-      }
-    });
+    form.addEventListener("submit", handleFormSubmit);
   }
+
+  carregarAlunos();
 });
 
-async function carregaralunos() {
+// Função para lidar com o envio do formulário
+async function handleFormSubmit(event) {
+  event.preventDefault(); // Previne o comportamento padrão do formulário
+
+  // Captura os valores dos campos do formulário
+  const formData = getFormData();
+  console.log("Dados do formulário:", formData);
+
+  try {
+    // Envia os dados para o servidor via requisição HTTP POST
+    const response = await fetch("http://localhost:3000/alunos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) throw new Error("Erro ao cadastrar usuário");
+
+    alert("Usuário cadastrado com sucesso!");
+    event.target.reset(); // Reseta o formulário
+    carregarAlunos(); // Atualiza a lista de alunos
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// Função para capturar os valores do formulário
+function getFormData() {
+  return {
+    nome: document.getElementById("nome").value,
+    dt_nascimento: document.getElementById("dt_nascimento").value,
+    contato: document.getElementById("contato").value,
+    email: document.getElementById("email").value,
+    endereco: document.getElementById("endereco").value,
+    cidade: document.getElementById("cidade").value,
+    faixa: document.getElementById("faixa").value,
+    grau: document.getElementById("grau").value,
+    ultgraduacao: document.getElementById("ultgraduacao").value,
+    nomeemergencia: document.getElementById("nomeemergencia").value,
+    contatoemergencia: document.getElementById("contatoemergencia").value,
+  };
+}
+
+// Função para carregar e exibir a lista de alunos na tabela
+async function carregarAlunos() {
   const tabela = document.getElementById("tabela-alunos");
   if (!tabela) return;
 
@@ -77,6 +67,7 @@ async function carregaralunos() {
       return;
     }
 
+    // Monta o cabeçalho da tabela
     tabela.innerHTML = `<tr>
       <th>Nome</th>
       <th>Data de Nascimento</th>
@@ -91,6 +82,7 @@ async function carregaralunos() {
       <th>Contato Emergência</th>
     </tr>`;
 
+    // Preenche a tabela com os dados dos alunos
     alunos.forEach((user) => {
       const getValue = (value) => (value ? value : "Não informado");
       const linha = document.createElement("tr");
@@ -113,5 +105,3 @@ async function carregaralunos() {
     console.error("Erro ao carregar usuários:", error);
   }
 }
-
-carregaralunos();
